@@ -1,0 +1,73 @@
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-limsolve
+  # Note that conda versions cannot contain -, so any -'s in the version have
+  # been replaced with _'s.
+  version: "1.5.5.3"
+
+source:
+  fn: limsolve_1.5.5.3.tar.gz
+  url:
+    - https://cran.r-project.org/src/contrib/limSolve_1.5.5.3.tar.gz
+  sha256: 2f27c03411e0d771ad50d5412125bf4fa0ba461051610edc77e20d28488e86d2
+
+
+build:
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+  # This is required to make R link correctly on Linux.
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+requirements:
+  build:
+    - r-base =3.4.1
+    - r-roxygen2 =6.0.1
+    - libgcc-ng =7.2.0
+    - libgfortran-ng =7.2.0
+    - r-lpsolve =5.6.13
+    - r-mass =7.3_48
+    - r-quadprog =1.5_5
+    - libgcc-ng =7.2.0      # [not osx]
+    - libgfortran-ng =7.2.0 # [not osx]
+    - libgfortran           # [osx]
+    - libgcc                # [osx]
+    - glib 2.50.2
+    - posix               # [win]
+    - {{native}}toolchain # [win]
+    - gcc                 # [not win]
+
+  run:
+    - r-base >=2.1.0
+    - r-roxygen2 >=6.0.1
+    - libgcc-ng >=7.2.0      # [not osx]
+    - libgfortran-ng >=7.2.0 # [not osx]
+    - libgfortran            # [osx]
+    - libgcc                 # [osx]
+    - r-lpsolve >=5.6.13
+    - r-mass >=7.3_48
+    - r-quadprog >=1.5_5
+
+test:
+  commands:
+    # You can put additional test commands to be run here.
+    - $R -e "library('limSolve')" # [not win]
+    - "\"%R%\" -e \"library('limSolve')\"" # [win]
+
+  # You can also put a file called run_test.py, run_test.sh, or run_test.bat
+  # in the recipe that will be run at test time.
+
+  # requires:
+    # Put any additional test requirements here.
+
+about:
+  home: https://cran.r-project.org/package=limSolve
+  license: GPL2 | GPL-3
+  summary: "Functions that (1) find the minimum/maximum of a linear or quadratic function: min or max (f(x)), where f(x) = ||Ax-b||^2 or f(x) = sum(a_i*x_i) subject to equality constraints Ex=f and/or inequality constraints Gx>=h, (2) sample an underdetermined- or overdetermined system Ex=f subject to Gx>=h, and if applicable Ax~=b, (3) solve a linear system Ax=B for the unknown x. It includes banded and tridiagonal linear systems. The package calls Fortran functions from 'LINPACK'."
+  license_family: GPL
+

@@ -1,0 +1,54 @@
+os:
+  - linux
+  - osx
+
+# osx build is just fyi and not officially supported.
+matrix:
+  allow_failures:
+    - os: osx
+
+# language: python sets up virtualenv and pip that we don't need.
+# omitting language gives us ruby stuff. c seems likely to be a minimal setup.
+language: c
+
+install:
+  # Install dependencies for Conda
+  - printenv | sort
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      MINICONDA_OS=Linux ;
+    else
+      MINICONDA_OS=MacOSX ;
+    fi ;
+    echo "Fetching miniconda for $MINICONDA_OS" ;
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-$MINICONDA_OS-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - source "$HOME"/miniconda/bin/activate root
+  - printenv | sort
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels r
+  - conda config --add channels bioconda
+  - conda config --add channels conda-forge
+  - conda config --add channels grst
+  - conda update -q conda
+  - conda install conda-build
+  # Useful for debugging any issues with conda
+  - conda info -a
+
+script:
+  # Test conda package
+  - conda build .
+  - conda install --use-local r-limsolve
+
+sudo: false
+cache: packages
+
+after_success:
+  # - conda install -c anaconda anaconda-client
+  # - |
+  #   for i in $(find . -maxdepth 1 -mindepth 1 -type d -not -path '*\/.*')
+  #   do
+  #     anaconda upload -t $CONDA_UPLOAD_TOKEN -u grst $(conda build $i --output)
+  #   done
